@@ -1,29 +1,45 @@
-# Welcome to your Expo app 👋
+# Welcome to Lager Blogs
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a blog project created for the Presentaton of Lager Backend Developer Position Demo Exam.
+A mobile blogging application built with **Expo**. This app allows users to **register**, **log in**, and **create, edit, delete** blog posts and comments.
 
-## Get started
+## Features
 
-1. Install dependencies
+- User Authentication (Registration & Login)
+- Create, Read, Update, Delete (CRUD) Blog Posts
+- Add Comments to Posts
+- Responsive Mobile UI
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **Frontend:** Expo
+- **Navigation:** React Navigation
+- **State Management:** Context API
+- **HTTP Client:** Axios
+- **Form Handling:** Formik
+- **Authentication:** JWT
+- **Backend:** Django REST API
 
-   ```bash
-   npx expo start
-   ```
+## Installation
 
-In the output, you'll find options to open the app in a
+### 1. Clone the Repository
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+```bash
+git clone https://github.com/AsnakeMulu/Lager-blog-app.git
+cd lager-blog-app
+```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the Development Server
+
+```bash
+npx expo start
+```
 
 ## Get a fresh project
 
