@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { API_BASE_URL } from "../../constants/config";
+import { API_BASE_URL } from "../constants/config";
 
 interface Blog {
   id: number;
@@ -152,14 +152,23 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>Welcome</Text>
           </View>
         </View>
-        <View style={styles.leftMenu}>
-          <Text style={styles.userName}>Asnake</Text>
-          <Image source={{ uri: userImage }} style={styles.profileImage} />
-        </View>
+        <TouchableOpacity style={styles.loginButton}>
+          <Text style={styles.addTopicsText}>login</Text>
+        </TouchableOpacity>
         {/* <Avatar.Image
           size={40}
           source={{ uri: "https://via.placeholder.com/40" }} // Replace with user image URI
         /> */}
+      </View>
+
+      <View style={styles.emptyStateContainer}>
+        <Text style={styles.emptyStateText}>
+          Hey There, if you like to post new blog and to comment on blogs.
+        </Text>
+
+        <TouchableOpacity style={styles.registerButton}>
+          <Text style={styles.addTopicsText}>Register now</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Search TextInput added here */}
@@ -341,5 +350,36 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#999",
+  },
+  emptyStateContainer: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 12,
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  registerButton: {
+    backgroundColor: "#000",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 15,
+  },
+  loginButton: {
+    backgroundColor: "#000",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  addTopicsText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });
