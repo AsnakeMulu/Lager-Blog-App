@@ -14,6 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { UserProvider } from "../utils/UserContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,38 +26,34 @@ export default function RootLayout() {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const token = await AsyncStorage.getItem("access_token"); // or any login key
+      const token = await AsyncStorage.getItem("access_token");
       setIsLoggedIn(!!token);
     };
     checkLoginStatus();
   }, []);
 
   if (!loaded || isLoggedIn === null) {
-    // Async font loading only occurs in development.
-    return null;
+    return null; // or use a loading screen
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <SafeAreaProvider>
-        {Platform.OS === "android" && (
-          <View
-            style={{
-              height: RNStatusBar.currentHeight,
-              backgroundColor: "#0077b6",
-            }}
-          />
-        )}
-        <Stack>
-          {isLoggedIn ? (
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          ) : (
-            <Stack.Screen name="welcome" options={{ headerShown: false }} />
+    <UserProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <SafeAreaProvider>
+          {Platform.OS === "android" && (
+            <View
+              style={{
+                height: RNStatusBar.currentHeight,
+                backgroundColor: "#0077b6",
+              }}
+            />
           )}
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </SafeAreaProvider>
-    </ThemeProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            {/* All routes registered normally. No conditionally added screens here. */}
+          </Stack>
+          <StatusBar style="auto" />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </UserProvider>
   );
 }

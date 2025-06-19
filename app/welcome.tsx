@@ -2,12 +2,12 @@
 // import { Platform, StyleSheet } from 'react-native';
 
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
-  ListRenderItemInfo,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +16,8 @@ import {
   View,
 } from "react-native";
 import { API_BASE_URL } from "../constants/config";
+
+import axios from "axios";
 
 interface Blog {
   id: number;
@@ -68,6 +70,8 @@ const BlogItem = ({ blog }: { blog: Blog }) => (
 );
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   const popularTags: string[] = [
     "Politics",
     "Music",
@@ -85,29 +89,46 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/posts/`);
+  const [blogs, setBlogs] = useState([]);
+  // const [filteredPosts, setFilteredPosts] = useState(allPosts);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  const handleSearch = () => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query === "") {
+      setFilteredBlogs(blogs); // Show all if empty
+    } else {
+      const filtered = blogs.filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(query) ||
+          blog.content.toLowerCase().includes(query)
+      );
+      setFilteredBlogs(filtered);
+    }
+  };
 
-        const data: Blog[] = await response.json();
-        setPopularBlogs(data);
-        setFilteredBlogs(data);
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchBlogs = async () => {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/api/posts/`);
 
-    fetchBlogs();
-  }, []);
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
+
+  //       const data: Blog[] = await response.json();
+  //       setPopularBlogs(data);
+  //       setFilteredBlogs(data);
+  //     } catch (err) {
+  //       const message =
+  //         err instanceof Error ? err.message : "An unknown error occurred";
+  //       setError(message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchBlogs();
+  // }, []);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -122,8 +143,49 @@ export default function HomeScreen() {
     }
   }, [searchQuery, popularBlogs]);
 
-  const renderBlogItem = ({ item }: ListRenderItemInfo<Blog>) => (
-    <BlogItem blog={item} />
+  useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/api/posts/`)
+      .then((response) => {
+        setBlogs(response.data);
+        setFilteredBlogs(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching blogs", error);
+        setLoading(false);
+      });
+  }, []);
+
+  // const handleSearch = () => {
+  //   if (onSearch) {
+  //     onSearch(searchQuery);
+  //   }
+  // };
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: "/blog/[id]",
+          params: { id: item.id.toString() },
+        })
+      }
+    >
+      <View style={styles.blogItem}>
+        <Image source={{ uri: item.image }} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{item.title}</Text>
+          <View style={styles.dateRow}>
+            <MaterialIcons name="calendar-month" size={14} color="#666" />
+            <Text style={styles.dateText}>
+              {" "}
+              {new Date(item.created_at).toDateString()}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -146,13 +208,16 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.leftMenu}>
           {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="menu" size={32} color="#999" />
+          <MaterialIcons name="auto-stories" size={32} color="#333" />
           {/* </TouchableOpacity> */}
           <View>
-            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.welcomeText}>Lager Blogs</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => router.push("/login")}
+        >
           <Text style={styles.addTopicsText}>login</Text>
         </TouchableOpacity>
         {/* <Avatar.Image
@@ -160,38 +225,47 @@ export default function HomeScreen() {
           source={{ uri: "https://via.placeholder.com/40" }} // Replace with user image URI
         /> */}
       </View>
-
-      <View style={styles.emptyStateContainer}>
-        <Text style={styles.emptyStateText}>
-          Hey There, if you like to post new blog and to comment on blogs.
-        </Text>
-
-        <TouchableOpacity style={styles.registerButton}>
-          <Text style={styles.addTopicsText}>Register now</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search TextInput added here */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search blogs..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-
-      <Text style={styles.sectionTitle}>Popular Tag</Text>
-      <PopularTags tags={popularTags} />
-
-      <Text style={styles.sectionTitle}>Popular Blog</Text>
       <FlatList
         data={filteredBlogs}
-        renderItem={renderBlogItem}
         keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={
-          <Text style={styles.noResultsText}>
-            No blogs found matching your search
-          </Text>
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <>
+            <View style={styles.emptyStateContainer}>
+              <Text style={styles.emptyStateText}>
+                Hey There, if you like to post new blog and to comment on blogs.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.registerButton}
+                onPress={() => router.push("/register")}
+              >
+                <Text style={styles.addTopicsText}>Register now</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search blogs..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
+                <MaterialIcons name="search" size={24} color="#999" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.sectionTitle}>Popular Tag</Text>
+            <PopularTags tags={popularTags} />
+
+            <Text style={styles.sectionTitle}>Popular Blog</Text>
+          </>
         }
       />
     </View>
@@ -204,6 +278,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
+  list: {
+    paddingBottom: 20,
+    paddingHorizontal: 8, // optional for consistent spacing
+  },
+
   stepContainer: {
     gap: 8,
     marginBottom: 8,
@@ -217,16 +296,32 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: 12,
     backgroundColor: "#fff",
   },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    // margin: 10,
+  },
   searchInput: {
-    height: 40,
-    borderColor: "#e0e0e0",
+    flex: 1,
+    height: 45,
+    borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 16,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    backgroundColor: "#fff",
+  },
+  searchButton: {
+    // marginLeft: 10,
+    // backgroundColor: "#ff7101", // Use your primary color
+    padding: 10,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
   loadingContainer: {
     flex: 1,
@@ -252,7 +347,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginVertical: 12,
   },
   tagsContainer: {
     paddingBottom: 8,
@@ -271,9 +366,9 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 14,
   },
-  blogItem: {
-    paddingVertical: 12,
-  },
+  //   blogItem: {
+  //     paddingVertical: 12,
+  //   },
   blogImage: {
     width: "100%",
     height: 200,
@@ -322,8 +417,12 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 24,
     color: "#666",
-    paddingLeft: 4,
+    paddingLeft: 8,
     fontWeight: "bold",
+  },
+  leftMenu: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   userName: {
     fontSize: 16,
@@ -339,10 +438,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#0077b6",
     borderRadius: 30,
     padding: 8,
-  },
-  leftMenu: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   profileImage: {
     width: 36,
@@ -381,5 +476,37 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  // list: {
+  //   paddingBottom: 20,
+  // },
+  blogItem: {
+    flexDirection: "row",
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 15,
+    borderWidth: 1,
+    borderColor: "#999",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dateText: {
+    color: "#666",
+    fontSize: 13,
   },
 });
