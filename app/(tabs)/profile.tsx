@@ -1,14 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  FlatList,
   Image,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
 // const useLogout = () => {
@@ -28,150 +32,130 @@ import { useUser } from "../../utils/UserContext";
 const ProfileScreen = () => {
   const router = useRouter();
   const { user, logout } = useUser();
-  // const logout = useLogout();
-  const [activeTab, setActiveTab] = useState<"SAVED" | "BONUSES">("SAVED");
-  const [topics, setTopics] = useState<string[]>(["Sports", "Home Racing"]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      const token = await AsyncStorage.getItem("access_token");
+
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/api/posts/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const userPosts = response.data.filter(
+          (post) => post.author.id === user?.id
+        );
+
+        setPosts(userPosts);
+      } catch (error) {
+        console.error("Failed to fetch user posts", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserPosts();
+  }, []);
+
   return (
-    <>
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.leftMenu}>
           {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#333" />
+          <MaterialIcons name="auto-stories" size={32} color="#fff" />
           {/* </TouchableOpacity> */}
           <View>
             <Text style={styles.welcomeText}>Lager Blogs</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.loginButton} onPress={logout}>
-          <Text style={styles.addTopicsText}>logout</Text>
+          <MaterialIcons name="logout" size={18} color="#fff" />
+          <Text style={styles.addTopicsText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.container}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <Image
-            source={{ uri: "https://example.com/profile-pic.jpg" }}
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileName}>John Snow</Text>
-          <Text style={styles.profileHandle}>@J.Snow_notting</Text>
+      <FlatList
+        data={posts}
+        contentContainerStyle={styles.tagsContainer}
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={
+          <>
+            {/* Profile Header */}
+            <View style={styles.profileHeader}>
+              <Image
+                source={{ uri: "https://example.com/profile-pic.jpg" }}
+                style={styles.profileImage}
+              />
+              <Text style={styles.profileName}>{user?.username}</Text>
+              <Text style={styles.profileHandle}>{user?.email}</Text>
 
-          {/* Stats Row */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>230</Text>
-              <Text style={styles.statLabel}>R E A D S</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>100</Text>
-              <Text style={styles.statLabel}>S A Y E D</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>200</Text>
-              <Text style={styles.statLabel}>S H A R E</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyStateText}>
-            Hey John, it seems like you have not
-          </Text>
-          <Text style={styles.emptyStateText}>added any topic yet.</Text>
-
-          <TouchableOpacity style={styles.addTopicsButton}>
-            <Text style={styles.addTopicsText}>+ Add topics</Text>
-          </TouchableOpacity>
-        </View> */}
-        <Text style={styles.sectionTitle}>Your Latest Blogs</Text>
-
-        {/* SAVED | BONUSES Tabs */}
-        <View style={styles.tabContainer}>
-          {/* <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === "SAVED" && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab("SAVED")}
-          > */}
-          {/* <Text
-            style={[
-              styles.tabText,
-              activeTab === "SAVED" && styles.activeTabText,
-            ]}
-          >
-            SAVED
-          </Text> */}
-          {/* </TouchableOpacity> */}
-
-          {/* <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === "BONUSES" && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab("BONUSES")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "BONUSES" && styles.activeTabText,
-              ]}
-            >
-              BONUSES
-            </Text>
-          </TouchableOpacity> */}
-        </View>
-
-        <View style={styles.feedItem}>
-          {/* Topics Chips */}
-          <View style={styles.topicsContainer}>
-            {topics.map((topic, index) => (
-              <View key={index} style={styles.topicChip}>
-                <Text style={styles.topicText}>{topic}</Text>
+              {/* Stats Row */}
+              <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{posts.length}</Text>
+                  <Text style={styles.statLabel}>P O S T S</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>100</Text>
+                  <Text style={styles.statLabel}>S A V E D</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>200</Text>
+                  <Text style={styles.statLabel}>S H A R E</Text>
+                </View>
               </View>
-            ))}
-          </View>
-          <Text style={styles.feedTitle}>
-            Racing association may set up company in Malta
-          </Text>
-          <Text style={styles.feedMeta}>Feeds Aug 12, 2022</Text>
-        </View>
 
-        {/* Navigation Tabs */}
-        {/* <View style={styles.tabsContainer}>
-        <TouchableOpacity style={styles.tabButton}>
-          <Text style={styles.tabText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton}>
-          <Text style={styles.tabText}>History</Text>
-        </TouchableOpacity>
-      </View> */}
-
-        {/* Feed Items */}
-        <View style={styles.feedItem}>
-          <Text style={styles.feedTitle}>
-            Racing association may set up company in Malta
-          </Text>
-          <Text style={styles.feedMeta}>Feeds - Aug 12, 2022</Text>
-          {/* <View style={styles.feedActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionText}>Score</Text>
+              <Text style={styles.sectionTitle}>Your Latest Blogs</Text>
+            </View>
+          </>
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/blog/[id]",
+                params: { id: item.id.toString() },
+              })
+            }
+          >
+            <View
+              style={{
+                marginHorizontal: 16,
+                marginBottom: 14,
+                padding: 12,
+                backgroundColor: "#f2f2f2",
+                borderRadius: 8,
+              }}
+            >
+              <Text style={styles.feedTitle}>{item.title}</Text>
+              <Text numberOfLines={2} style={{ paddingBottom: 6 }}>
+                {item.content}
+              </Text>
+              <Text style={styles.feedMeta}>
+                {new Date(item.created_at).toDateString()}
+              </Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionText}>Kodolsi</Text>
-          </TouchableOpacity>
-        </View> */}
-        </View>
-
-        <View style={styles.feedItem}>
-          <Text style={styles.feedTitle}>
-            Chronicle: Björkander Ēāmnar Mjällby – går till Turkiet
-          </Text>
-          <Text style={styles.feedMeta}>Alien K - Mar 01, 2022</Text>
-        </View>
-      </ScrollView>
-    </>
+        )}
+        ListEmptyComponent={
+          loading ? (
+            <ActivityIndicator
+              size="large"
+              color="#ff7101"
+              style={{ marginTop: 20 }}
+            />
+          ) : (
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
+              No posts yet.
+            </Text>
+          )
+        }
+      />
+    </View>
   );
 };
 
@@ -180,9 +164,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  tagsContainer: {
+    backgroundColor: "#fff",
+    paddingBottom: 4,
+  },
   profileHeader: {
     alignItems: "center",
-    padding: 20,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
@@ -207,7 +195,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    marginTop: 10,
+    marginVertical: 10,
   },
   statItem: {
     alignItems: "center",
@@ -244,10 +232,14 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#333",
-    padding: 16,
+    paddingTop: 12,
+    paddingLeft: 10,
+    alignSelf: "flex-start", // Ensures it aligns to the start of its container
+    textAlign: "left",
+    textTransform: "uppercase",
   },
   searchContainer: {
     padding: 15,
@@ -322,7 +314,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   addTopicsText: {
-    color: "#333",
+    color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -375,7 +367,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   feedTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     marginBottom: 6,
     color: "#333",
@@ -385,7 +377,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   header: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#0077b6",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -400,20 +392,22 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   welcomeText: {
-    fontSize: 24,
-    color: "#666",
+    fontSize: 18,
+    color: "#fff",
     paddingLeft: 8,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   leftMenu: {
     flexDirection: "row",
     alignItems: "center",
   },
   loginButton: {
-    backgroundColor: "#ccc",
+    flexDirection: "row",
+    backgroundColor: "#408dc5",
     borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   // addTopicsText: {
   //   color: "#fff",

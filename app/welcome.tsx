@@ -42,32 +42,32 @@ const PopularTags = ({ tags }: { tags: string[] }) => (
   </ScrollView>
 );
 
-const BlogItem = ({ blog }: { blog: Blog }) => (
-  <View style={styles.blogItem}>
-    {blog.image && (
-      <Image
-        source={{ uri: blog.image }}
-        style={styles.blogImage}
-        resizeMode="cover"
-      />
-    )}
-    <Text style={styles.blogTitle}>{blog.title}</Text>
-    <Text style={styles.blogContent}>{blog.content}</Text>
-    {blog.date && (
-      <View style={styles.blogDateContainer}>
-        <Text style={styles.blogIcon}>💷</Text>
-        <Text style={styles.blogDate}>
-          {new Date(blog.date).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-        </Text>
-        <Text style={styles.blogIcon}>💷</Text>
-      </View>
-    )}
-  </View>
-);
+// const BlogItem = ({ blog }: { blog: Blog }) => (
+//   <View style={styles.blogItem}>
+//     {blog.image && (
+//       <Image
+//         source={{ uri: blog.image }}
+//         style={styles.blogImage}
+//         resizeMode="cover"
+//       />
+//     )}
+//     <Text style={styles.blogTitle}>{blog.title}</Text>
+//     <Text style={styles.blogContent}>{blog.content}</Text>
+//     {blog.date && (
+//       <View style={styles.blogDateContainer}>
+//         <Text style={styles.blogIcon}>💷</Text>
+//         <Text style={styles.blogDate}>
+//           {new Date(blog.date).toLocaleDateString("en-GB", {
+//             day: "numeric",
+//             month: "short",
+//             year: "numeric",
+//           })}
+//         </Text>
+//         <Text style={styles.blogIcon}>💷</Text>
+//       </View>
+//     )}
+//   </View>
+// );
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -83,65 +83,41 @@ export default function HomeScreen() {
   ];
 
   const userImage = "https://example.com/profile.jpg";
-  const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
+  // const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
+  // const [filteredPosts, setFilteredPosts] = useState(allPosts);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
 
   const [blogs, setBlogs] = useState([]);
-  // const [filteredPosts, setFilteredPosts] = useState(allPosts);
 
-  const handleSearch = () => {
-    const query = searchQuery.trim().toLowerCase();
-    if (query === "") {
-      setFilteredBlogs(blogs); // Show all if empty
-    } else {
-      const filtered = blogs.filter(
-        (blog) =>
-          blog.title.toLowerCase().includes(query) ||
-          blog.content.toLowerCase().includes(query)
-      );
-      setFilteredBlogs(filtered);
-    }
-  };
-
-  // useEffect(() => {
-  //   const fetchBlogs = async () => {
-  //     try {
-  //       const response = await fetch(`${API_BASE_URL}/api/posts/`);
-
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! status: ${response.status}`);
-  //       }
-
-  //       const data: Blog[] = await response.json();
-  //       setPopularBlogs(data);
-  //       setFilteredBlogs(data);
-  //     } catch (err) {
-  //       const message =
-  //         err instanceof Error ? err.message : "An unknown error occurred";
-  //       setError(message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchBlogs();
-  // }, []);
+  // const handleSearch = () => {
+  //   const query = searchQuery.trim().toLowerCase();
+  //   if (query === "") {
+  //     setFilteredBlogs(blogs); // Show all if empty
+  //   } else {
+  //     const filtered = blogs.filter(
+  //       (blog) =>
+  //         blog.title.toLowerCase().includes(query) ||
+  //         blog.content.toLowerCase().includes(query)
+  //     );
+  //     setFilteredBlogs(filtered);
+  //   }
+  // };
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredBlogs(popularBlogs);
+      setFilteredBlogs(blogs);
     } else {
-      const filtered = popularBlogs.filter(
+      const filtered = blogs.filter(
         (blog) =>
           blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           blog.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredBlogs(filtered);
     }
-  }, [searchQuery, popularBlogs]);
+  }, [searchQuery, blogs]);
 
   useEffect(() => {
     axios
@@ -156,12 +132,6 @@ export default function HomeScreen() {
         setLoading(false);
       });
   }, []);
-
-  // const handleSearch = () => {
-  //   if (onSearch) {
-  //     onSearch(searchQuery);
-  //   }
-  // };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -208,7 +178,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.leftMenu}>
           {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#333" />
+          <MaterialIcons name="auto-stories" size={32} color="#fff" />
           {/* </TouchableOpacity> */}
           <View>
             <Text style={styles.welcomeText}>Lager Blogs</Text>
@@ -218,6 +188,7 @@ export default function HomeScreen() {
           style={styles.loginButton}
           onPress={() => router.push("/login")}
         >
+          <MaterialIcons name="login" size={18} color="#fff" />
           <Text style={styles.addTopicsText}>login</Text>
         </TouchableOpacity>
         {/* <Avatar.Image
@@ -251,20 +222,20 @@ export default function HomeScreen() {
                 style={styles.searchInput}
                 placeholder="Search blogs..."
                 value={searchQuery}
-                onChangeText={setSearchQuery}
+                onChangeText={(text) => setSearchQuery(text)}
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.searchButton}
                 onPress={handleSearch}
               >
                 <MaterialIcons name="search" size={24} color="#999" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
-            <Text style={styles.sectionTitle}>Popular Tag</Text>
-            <PopularTags tags={popularTags} />
+            {/* <Text style={styles.sectionTitle}>Popular Tags</Text>
+            <PopularTags tags={popularTags} /> */}
 
-            <Text style={styles.sectionTitle}>Popular Blog</Text>
+            <Text style={styles.sectionTitle}>Popular Blogs</Text>
           </>
         }
       />
@@ -279,6 +250,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   list: {
+    marginHorizontal: 8,
+    // padding: 12,
     paddingBottom: 20,
     paddingHorizontal: 8, // optional for consistent spacing
   },
@@ -296,7 +269,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 12,
+    // padding: 12,
     backgroundColor: "#fff",
   },
   searchContainer: {
@@ -310,8 +283,8 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     paddingHorizontal: 10,
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
+    borderRadius: 8,
+    // borderBottomLeftRadius: 8,
     backgroundColor: "#fff",
   },
   searchButton: {
@@ -376,7 +349,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   blogTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     marginBottom: 8,
   },
@@ -406,19 +379,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
+    padding: 8,
 
-    shadowColor: "#000",
+    backgroundColor: "#0077b6",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
   },
   welcomeText: {
-    fontSize: 24,
-    color: "#666",
+    fontSize: 20,
+    color: "#fff",
     paddingLeft: 8,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   leftMenu: {
     flexDirection: "row",
@@ -460,22 +435,24 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   registerButton: {
-    backgroundColor: "#000",
+    backgroundColor: "#408dc5",
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 15,
   },
   loginButton: {
-    backgroundColor: "#000",
+    flexDirection: "row",
+    backgroundColor: "#408dc5",
     borderRadius: 20,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   addTopicsText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+    paddingLeft: 4,
   },
   // list: {
   //   paddingBottom: 20,
@@ -489,7 +466,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 10,
-    marginRight: 15,
+    marginRight: 10,
     borderWidth: 1,
     borderColor: "#999",
   },
@@ -497,7 +474,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     marginBottom: 4,
   },

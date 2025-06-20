@@ -2,13 +2,13 @@
 // import { Platform, StyleSheet } from 'react-native';
 
 import { MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
-  ListRenderItemInfo,
   ScrollView,
   StyleSheet,
   Text,
@@ -44,32 +44,33 @@ const PopularTags = ({ tags }: { tags: string[] }) => (
   </ScrollView>
 );
 
-const BlogItem = ({ blog }: { blog: Blog }) => (
-  <View style={styles.blogItem}>
-    {/* {blog.image && ( */}
-    <Image
-      source={{ uri: blog.image }}
-      style={styles.blogImage}
-      resizeMode="cover"
-    />
-    {/* )} */}
-    <Text style={styles.blogTitle}>{blog.title}</Text>
-    <Text style={styles.blogContent}>{blog.content}</Text>
-    {blog.created_at && (
-      <Text style={styles.blogDate}>
-        {new Date(blog.created_at).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}
-      </Text>
-    )}
-  </View>
-);
+// const BlogItem = ({ blog }: { blog: Blog }) => (
+//   <View style={styles.blogItem}>
+//     {/* {blog.image && ( */}
+//     <Image
+//       source={{ uri: blog.image }}
+//       style={styles.blogImage}
+//       resizeMode="cover"
+//     />
+//     {/* )} */}
+//     <Text style={styles.blogTitle}>{blog.title}</Text>
+//     <Text style={styles.blogContent}>{blog.content}</Text>
+//     {blog.created_at && (
+//       <Text style={styles.blogDate}>
+//         {new Date(blog.created_at).toLocaleDateString("en-GB", {
+//           day: "numeric",
+//           month: "short",
+//           year: "numeric",
+//         })}
+//       </Text>
+//     )}
+//   </View>
+// );
 
 export default function Index() {
   const router = useRouter();
   const { user } = useUser();
+  const isFocused = useIsFocused();
   const popularTags: string[] = [
     "Politics",
     "Music",
@@ -86,75 +87,101 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
 
-  const handleSearch = () => {
-    const query = searchQuery.trim().toLowerCase();
-    if (query === "") {
-      setFilteredBlogs(blogs); // Show all if empty
-    } else {
-      const filtered = blogs.filter(
-        (blog) =>
-          blog.title.toLowerCase().includes(query) ||
-          blog.content.toLowerCase().includes(query)
-      );
-      setFilteredBlogs(filtered);
+  useEffect(() => {
+    if (isFocused) {
+      fetchBlogs(); // Your function to load posts from backend
+    }
+  }, [isFocused]);
+
+  // const handleSearch = () => {
+  //   const query = searchQuery.trim().toLowerCase();
+  //   if (query === "") {
+  //     setFilteredBlogs(blogs); // Show all if empty
+  //   } else {
+  //     const filtered = blogs.filter(
+  //       (blog) =>
+  //         blog.title.toLowerCase().includes(query) ||
+  //         blog.content.toLowerCase().includes(query)
+  //     );
+  //     setFilteredBlogs(filtered);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`${API_BASE_URL}/api/posts/`)
+  //     .then((response) => {
+  //       setBlogs(response.data);
+  //       setFilteredBlogs(response.data);
+  //       setLoading(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching blogs", error);
+  //       setLoading(false);
+  //     });
+  // }, []);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await axios.get<Blog[]>(`${API_BASE_URL}/api/posts/`);
+
+      setBlogs(response.data);
+      setFilteredBlogs(response.data);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/api/posts/`)
-      .then((response) => {
-        setBlogs(response.data);
-        setFilteredBlogs(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching blogs", error);
-        setLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/posts/`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: Blog[] = await response.json();
-        setPopularBlogs(data);
-        setFilteredBlogs(data);
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlogs();
-  }, []);
-
-  useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredBlogs(popularBlogs);
+      setFilteredBlogs(blogs);
     } else {
-      const filtered = popularBlogs.filter(
+      const filtered = blogs.filter(
         (blog) =>
           blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           blog.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredBlogs(filtered);
     }
-  }, [searchQuery, popularBlogs]);
+  }, [searchQuery, blogs]);
 
-  const renderBlogItem = ({ item }: ListRenderItemInfo<Blog>) => (
-    <BlogItem blog={item} />
+  // const renderBlogItem = ({ item }: ListRenderItemInfo<Blog>) => (
+  //   <BlogItem blog={item} />
+  // );
+
+  const renderBlogItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: "/blog/[id]",
+          params: { id: item.id.toString() },
+        })
+      }
+    >
+      <View style={styles.blogItem}>
+        <Image source={{ uri: item.image }} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{item.title}</Text>
+          <View style={styles.dateRow}>
+            <MaterialIcons name="calendar-month" size={14} color="#666" />
+            <Text style={styles.dateText}>
+              {" "}
+              {new Date(item.created_at).toDateString()}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -173,14 +200,14 @@ export default function Index() {
     );
   }
   return (
-    <View style={styles.container}>
+    <>
       <View style={styles.header}>
         <View style={styles.leftMenu}>
           {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="menu" size={32} color="#999" />
+          <MaterialIcons name="auto-stories" size={32} color="#fff" />
           {/* </TouchableOpacity> */}
           <View>
-            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.welcomeText}>Lager Blogs</Text>
           </View>
         </View>
         <View style={styles.leftMenu}>
@@ -194,43 +221,46 @@ export default function Index() {
           source={{ uri: "https://via.placeholder.com/40" }} // Replace with user image URI
         /> */}
       </View>
-      <FlatList
-        data={filteredBlogs}
-        renderItem={renderBlogItem}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={
-          <Text style={styles.noResultsText}>
-            No blogs found matching your search
-          </Text>
-        }
-        ListHeaderComponent={
-          <>
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search blogs..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              <TouchableOpacity
-                style={styles.searchButton}
-                onPress={handleSearch}
-              >
-                <MaterialIcons name="search" size={24} color="#999" />
-              </TouchableOpacity>
-            </View>
 
-            <Text style={styles.sectionTitle}>Popular Tag</Text>
-            <PopularTags tags={popularTags} />
+      <View style={styles.container}>
+        <FlatList
+          data={filteredBlogs}
+          renderItem={renderBlogItem}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={
+            <Text style={styles.noResultsText}>
+              No blogs found matching your search
+            </Text>
+          }
+          ListHeaderComponent={
+            <>
+              <View style={styles.searchContainer}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search blogs..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {/* <TouchableOpacity
+                  style={styles.searchButton}
+                  onPress={handleSearch}
+                >
+                  <MaterialIcons name="search" size={24} color="#999" />
+                </TouchableOpacity> */}
+              </View>
 
-            <Text style={styles.sectionTitle}>Popular Blog</Text>
-          </>
-        }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        contentContainerStyle={{ paddingBottom: 10 }}
-      />
-    </View>
+              <Text style={styles.sectionTitle}>Popular Tags</Text>
+              <PopularTags tags={popularTags} />
+
+              <Text style={styles.sectionTitle}>Popular Blogs</Text>
+            </>
+          }
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          contentContainerStyle={{ paddingBottom: 4 }}
+        />
+      </View>
+    </>
   );
 }
 
@@ -253,7 +283,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingTop: 8,
     backgroundColor: "#fff",
   },
 
@@ -268,8 +299,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     paddingHorizontal: 10,
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
+    borderRadius: 8,
     backgroundColor: "#fff",
   },
   searchButton: {
@@ -280,6 +310,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
     borderWidth: 1,
     borderColor: "#ccc",
+  },
+  list: {
+    paddingBottom: 10,
+    // paddingHorizontal: 8, // optional for consistent spacing
   },
   // searchInput: {
   //   height: 40,
@@ -313,18 +347,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginVertical: 8,
   },
   tagsContainer: {
-    paddingBottom: 8,
+    paddingBottom: 4,
   },
   tagsScrollView: {
     maxHeight: 50, // Adjusted height for tags container
-    marginBottom: 16,
+    marginBottom: 4,
   },
   tagItem: {
     backgroundColor: "#f0f0f0",
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 16,
     marginRight: 8,
@@ -332,9 +366,9 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 14,
   },
-  blogItem: {
-    paddingVertical: 12,
-  },
+  // blogItem: {
+  //   paddingVertical: 12,
+  // },
   blogImage: {
     width: "100%",
     height: 200,
@@ -367,15 +401,15 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "#e0e0e0",
-    marginVertical: 8,
+    // backgroundColor: "#e0e0e0",
+    marginVertical: 4,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-
+    padding: 12,
+    backgroundColor: "#0077b6",
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
@@ -383,15 +417,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   welcomeText: {
-    fontSize: 24,
-    color: "#666",
-    paddingLeft: 4,
+    fontSize: 20,
+    color: "#fff",
+    paddingLeft: 6,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   userName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#999",
+    color: "#fff",
     paddingRight: 4,
   },
   menuButton: {
@@ -413,5 +448,34 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#999",
+  },
+  blogItem: {
+    flexDirection: "row",
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#999",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dateText: {
+    color: "#666",
+    fontSize: 13,
   },
 });

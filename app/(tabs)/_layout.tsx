@@ -42,7 +42,8 @@ export default function TabLayout() {
         options={{
           title: "New Blog",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <FontAwesome name="plus" size={28} color={color} />
+            // <IconSymbol size={28} name="new.fill" color={color} />
           ),
         }}
       />

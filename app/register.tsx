@@ -1,4 +1,5 @@
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -15,6 +16,7 @@ import { API_BASE_URL } from "../constants/config";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -86,20 +88,15 @@ export default function RegisterScreen() {
   return (
     <>
       <View style={styles.header}>
-        <View style={styles.leftMenu}>
-          {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#333" />
-          {/* </TouchableOpacity> */}
-          <View>
-            <Text style={styles.welcomeText}>Lager Blogs</Text>
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => router.push("/welcome")}
-        >
-          <Text style={styles.addTopicsText}>Home</Text>
+        {/* <View style={styles.leftMenu}> */}
+        <TouchableOpacity onPress={() => router.push("/welcome")}>
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
+        <View>
+          <Text style={styles.welcomeText}>Lager Blogs</Text>
+        </View>
+        <Text style={styles.addTopicsText}></Text>
+        {/* </View> */}
       </View>
       <View style={styles.container}>
         <Text style={styles.title}>Create Account</Text>
@@ -206,14 +203,14 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff7f0",
+    backgroundColor: "#f6f6f6",
     padding: 24,
     justifyContent: "center",
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#ff7101",
+    color: "#0077b6",
     textAlign: "center",
   },
   subtitle: {
@@ -226,7 +223,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ff7101",
+    borderColor: "#0077b6",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -234,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   registerBtn: {
-    backgroundColor: "#ff7101",
+    backgroundColor: "#408dc5",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
@@ -281,7 +278,7 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   header: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#0077b6",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -296,14 +293,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   welcomeText: {
-    fontSize: 24,
-    color: "#666",
+    fontSize: 20,
+    color: "#fff",
     paddingLeft: 8,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   leftMenu: {
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "space-between",
+    // alignItems: "center",
   },
   loginButton: {
     backgroundColor: "#000",
@@ -315,5 +314,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+    paddingHorizontal: 20,
   },
 });

@@ -17,6 +17,7 @@ import { useUser } from "../../utils/UserContext";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { user } = useUser();
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [slug, setSlug] = useState("");
@@ -28,7 +29,6 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = async () => {
-    const { user } = useUser();
     const token = await AsyncStorage.getItem("access_token"); // or 'token'
 
     const newErrors = {
@@ -54,12 +54,13 @@ export default function RegisterScreen() {
 
     try {
       setLoading(true);
-      let author = caption;
+      // let author = caption;
       const response = await axios.post(
         `${API_BASE_URL}/api/posts/`,
         {
           title,
-          //  slug,
+          caption,
+          slug,
           content,
           author: user?.id,
         },
@@ -70,8 +71,14 @@ export default function RegisterScreen() {
           },
         }
       );
-      console.log("Blog added:", response.data);
+
+      // console.log("Blog added:", response.data);
       Alert.alert("Success", "The blog created successfully.");
+
+      setTitle("");
+      setCaption("");
+      setSlug("");
+      setContent("");
       router.push("/home");
     } catch (error: any) {
       Alert.alert(
@@ -85,26 +92,18 @@ export default function RegisterScreen() {
   return (
     <>
       <View style={styles.header}>
-        <View style={styles.leftMenu}>
-          {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#333" />
-          {/* </TouchableOpacity> */}
-          <View>
-            <Text style={styles.welcomeText}>Lager Blogs</Text>
-          </View>
+        <MaterialIcons name="auto-stories" size={32} color="#fff" />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.welcomeText}>Lager Blogs</Text>
         </View>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => router.push("/welcome")}
-        >
-          <Text style={styles.addTopicsText}>Home</Text>
-        </TouchableOpacity>
       </View>
+
       <View style={styles.container}>
         <Text style={styles.title}>Create New Blog</Text>
 
         <Text style={styles.label}>Title</Text>
         <TextInput
+          value={title}
           placeholder="Title"
           placeholderTextColor="#999"
           style={[styles.input, errors.title ? { borderColor: "red" } : null]}
@@ -119,6 +118,7 @@ export default function RegisterScreen() {
 
         <Text style={styles.label}>Caption(optional)</Text>
         <TextInput
+          value={caption}
           placeholder="Caption"
           placeholderTextColor="#999"
           style={styles.input}
@@ -129,6 +129,7 @@ export default function RegisterScreen() {
 
         <Text style={styles.label}>Slug(optional)</Text>
         <TextInput
+          value={slug}
           placeholder="Slug"
           placeholderTextColor="#999"
           style={styles.input}
@@ -139,13 +140,22 @@ export default function RegisterScreen() {
 
         <Text style={styles.label}>Content</Text>
         <TextInput
-          placeholder="Content"
+          value={content}
+          placeholder="Write the content here"
           placeholderTextColor="#999"
-          style={[styles.input, errors.content ? { borderColor: "red" } : null]}
+          multiline
+          numberOfLines={5}
+          textAlignVertical="top"
+          style={[
+            styles.input,
+            { height: 120 }, // Adjust height for 5 rows (approx. 24px per row)
+            errors.content ? { borderColor: "red" } : null,
+          ]}
           onChangeText={(text) => {
             setContent(text);
             if (errors.content) setErrors((prev) => ({ ...prev, content: "" }));
           }}
+          value={content}
         />
         {errors.content ? (
           <Text style={styles.errorText}>{errors.content}</Text>
@@ -155,7 +165,7 @@ export default function RegisterScreen() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.registerText}>Register</Text>
+            <Text style={styles.registerText}>Create Blog</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -165,14 +175,14 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff7f0",
+    backgroundColor: "#f6f6f6",
     padding: 24,
     // justifyContent: "center",
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#ff7101",
+    color: "#0077b6",
     textAlign: "center",
   },
   label: {
@@ -185,15 +195,15 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ff7101",
+    borderColor: "#0077b6",
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   registerBtn: {
-    backgroundColor: "#ff7101",
+    backgroundColor: "#408dc5",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
@@ -240,25 +250,18 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   header: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#0077b6",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
-    // marginBottom: 12,
     padding: 12,
-    // paddingBottom: 12,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   welcomeText: {
-    fontSize: 24,
-    color: "#666",
+    fontSize: 20,
+    color: "#fff",
     paddingLeft: 8,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   leftMenu: {
     flexDirection: "row",
