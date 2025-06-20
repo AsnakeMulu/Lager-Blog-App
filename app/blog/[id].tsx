@@ -101,41 +101,76 @@ export default function BlogDetailScreen() {
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    try {
-      const token = await AsyncStorage.getItem("access_token");
-
-      await axios.delete(`${API_BASE_URL}/api/comments/${commentId}/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const handleDeleteComment = (commentId) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this comment?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
         },
-      });
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("access_token");
 
-      // Remove the comment from the local state
-      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
-    } catch (err) {
-      console.error("Failed to delete comment", err.response?.data);
-      Alert.alert("Error", "Unable to delete comment.");
-    }
+              await axios.delete(`${API_BASE_URL}/api/comments/${commentId}/`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              // Remove the comment from the local state
+              setComments((prev) =>
+                prev.filter((comment) => comment.id !== commentId)
+              );
+            } catch (err) {
+              console.error("Failed to delete comment", err.response?.data);
+              Alert.alert("Error", "Unable to delete comment.");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
-  const handleDeletePost = async (postId) => {
-    try {
-      const token = await AsyncStorage.getItem("access_token");
 
-      await axios.delete(`${API_BASE_URL}/api/posts/${postId}/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const handleDeletePost = (postId) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this post?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
         },
-      });
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("access_token");
 
-      // Remove the comment from the local state
-      // setPost((prev) => prev.filter((comment) => comment.id !== postId));
+              await axios.delete(`${API_BASE_URL}/api/posts/${postId}/`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
 
-      router.push("/home");
-    } catch (err) {
-      console.error("Failed to delete comment", err.response?.data);
-      Alert.alert("Error", "Unable to delete comment.");
-    }
+              // Navigate back or refresh post list
+              router.push("/home");
+            } catch (err) {
+              console.error("Failed to delete post", err.response?.data);
+              Alert.alert("Error", "Unable to delete the post.");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   if (!post) return <Text>Loading...</Text>;
