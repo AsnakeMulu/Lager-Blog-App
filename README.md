@@ -6,8 +6,12 @@ A mobile blogging application built with **Expo**. This app allows users to **re
 ## Features
 
 - User Authentication (Registration & Login)
-- Create, Read, Update, Delete (CRUD) Blog Posts
+- Create new blog posts
+- View a list of all posts
+- View details of a single post
 - Add Comments to Posts
+- Delete your own posts and comments
+- Search blogs 
 - Responsive Mobile UI
 
 ## Tech Stack
@@ -16,8 +20,7 @@ A mobile blogging application built with **Expo**. This app allows users to **re
 - **Navigation:** React Navigation
 - **State Management:** Context API
 - **HTTP Client:** Axios
-- **Form Handling:** Formik
-- **Authentication:** JWT
+- **Authentication:** SimpleJWT and Djoser
 - **Backend:** Django REST API
 
 ## Installation
@@ -40,27 +43,3 @@ npm install
 ```bash
 npx expo start
 ```
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
