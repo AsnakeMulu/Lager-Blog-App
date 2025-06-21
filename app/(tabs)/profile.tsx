@@ -15,20 +15,6 @@ import {
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
-// const useLogout = () => {
-//   const router = useRouter();
-//   const logout = async () => {
-//     try {
-//       await AsyncStorage.removeItem("access_token");
-//       router.replace("/welcome"); // or '/login'
-//     } catch (error) {
-//       console.error("Logout failed:", error);
-//     }
-//   };
-
-//   return logout;
-// };
-
 const ProfileScreen = () => {
   const router = useRouter();
   const { user, logout } = useUser();
@@ -209,27 +195,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 5,
   },
-  emptyState: {
-    padding: 20,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  // emptyStateText: {
-  //   fontSize: 16,
-  //   color: "#666",
-  //   textAlign: "center",
-  // },
-  emptyStateAuthor: {
-    fontSize: 14,
-    fontStyle: "italic",
-    color: "#666",
-    marginTop: 10,
-  },
-  sectionHeader: {
-    padding: 15,
-    backgroundColor: "#f5f5f5",
-  },
 
   sectionTitle: {
     fontSize: 16,
@@ -241,130 +206,10 @@ const styles = StyleSheet.create({
     textAlign: "left",
     textTransform: "uppercase",
   },
-  searchContainer: {
-    padding: 15,
-  },
-  searchInput: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    backgroundColor: "#f9f9f9",
-  },
-  tabsContainer: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  // tabButton: {
-  //   flex: 1,
-  //   padding: 15,
-  //   alignItems: "center",
-  // },
-  // tabText: {
-  //   fontSize: 16,
-  //   fontWeight: "bold",
-  //   color: "#333",
-  // },
-  // feedItem: {
-  //   padding: 15,
-  //   borderBottomWidth: 1,
-  //   borderBottomColor: "#eee",
-  // },
-  // feedTitle: {
-  //   fontSize: 16,
-  //   fontWeight: "bold",
-  //   marginBottom: 5,
-  // },
-  // feedMeta: {
-  //   fontSize: 12,
-  //   color: "#666",
-  //   marginBottom: 10,
-  // },
-  feedActions: {
-    flexDirection: "row",
-    marginTop: 10,
-  },
-  actionButton: {
-    marginRight: 15,
-  },
-  actionText: {
-    color: "#1a73e8",
-    fontWeight: "bold",
-  },
-  emptyStateContainer: {
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: "#333",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  addTopicsButton: {
-    backgroundColor: "#000",
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 15,
-  },
   addTopicsText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    marginBottom: 16,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#000",
-  },
-  tabText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#666",
-  },
-  activeTabText: {
-    color: "#000",
-    fontWeight: "bold",
-  },
-
-  topicsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 2,
-  },
-  topicChip: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  topicText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  feedItem: {
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
   },
   feedTitle: {
     fontSize: 14,
@@ -383,13 +228,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // marginBottom: 12,
     padding: 12,
-    // paddingBottom: 12,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   welcomeText: {
     fontSize: 18,
@@ -409,11 +247,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
   },
-  // addTopicsText: {
-  //   color: "#fff",
-  //   fontWeight: "bold",
-  //   fontSize: 14,
-  // },
 });
 
 export default ProfileScreen;

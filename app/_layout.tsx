@@ -33,7 +33,7 @@ export default function RootLayout() {
   }, []);
 
   if (!loaded || isLoggedIn === null) {
-    return null; // or use a loading screen
+    return null;
   }
 
   return (
@@ -48,9 +48,7 @@ export default function RootLayout() {
               }}
             />
           )}
-          <Stack screenOptions={{ headerShown: false }}>
-            {/* All routes registered normally. No conditionally added screens here. */}
-          </Stack>
+          <Stack screenOptions={{ headerShown: false }}></Stack>
           <StatusBar style="auto" />
         </SafeAreaProvider>
       </ThemeProvider>

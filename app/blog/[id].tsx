@@ -22,13 +22,12 @@ export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useUser();
   const router = useRouter();
-  const [post, setPost] = useState(null);
+  const navigation = useNavigation();
 
+  const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
-
-  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -49,14 +48,7 @@ export default function BlogDetailScreen() {
       try {
         const token = await AsyncStorage.getItem("access_token"); // ✅ Get the token
 
-        const res = await axios.get(
-          `${API_BASE_URL}/api/comments/?post=${id}`
-          // {
-          //   headers: {
-          //     Authorization: `Bearer ${token}`, // ✅ Add this header
-          //   },
-          // }
-        );
+        const res = await axios.get(`${API_BASE_URL}/api/comments/?post=${id}`);
 
         setComments(res.data);
       } catch (err) {
@@ -122,8 +114,6 @@ export default function BlogDetailScreen() {
                   Authorization: `Bearer ${token}`,
                 },
               });
-
-              // Remove the comment from the local state
               setComments((prev) =>
                 prev.filter((comment) => comment.id !== commentId)
               );
@@ -159,8 +149,6 @@ export default function BlogDetailScreen() {
                   Authorization: `Bearer ${token}`,
                 },
               });
-
-              // Navigate back or refresh post list
               router.push("/home");
             } catch (err) {
               console.error("Failed to delete post", err.response?.data);
@@ -173,7 +161,7 @@ export default function BlogDetailScreen() {
     );
   };
 
-  if (!post) return <Text>Loading...</Text>;
+  if (!post) return <Text>No Posts...</Text>;
 
   return (
     <>
@@ -184,11 +172,11 @@ export default function BlogDetailScreen() {
         <Text style={styles.welcomeText}> Blog details</Text>
         {post.author.id === user?.id && (
           <TouchableOpacity
-            style={styles.loginButton}
+            style={styles.deleteButton}
             onPress={() => handleDeletePost(post.id)}
           >
             <Ionicons name="trash-outline" size={18} color="#e63946" />
-            <Text style={styles.addTopicsText}> Delete</Text>
+            <Text style={styles.deleteText}> Delete</Text>
           </TouchableOpacity>
         )}
         {post.author.id !== user?.id && (
@@ -197,10 +185,6 @@ export default function BlogDetailScreen() {
       </View>
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.container}>
-          {/* <Text style={styles.title}>{post.title}</Text>
-      <Text style={styles.author}>By {post.author}</Text>
-      <Text style={styles.content}>{post.content}</Text> */}
-
           <Text style={styles.title}>{post.title}</Text>
           <View style={styles.meta}>
             <Image source={{ uri: post.author_image }} style={styles.avatar} />
@@ -286,25 +270,6 @@ export default function BlogDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  // container: {
-  //   padding: 16,
-  // },
-  // title: {
-  //   fontSize: 24,
-  //   fontWeight: "bold",
-  //   marginBottom: 8,
-  //   color: "#888",
-  // },
-  // author: {
-  //   fontSize: 14,
-  //   color: "#888",
-  //   marginBottom: 16,
-  // },
-  // content: {
-  //   fontSize: 16,
-  //   lineHeight: 22,
-  //   color: "#888",
-  // },
   container: {
     padding: 10,
     backgroundColor: "#fff",
@@ -339,14 +304,14 @@ const styles = StyleSheet.create({
     color: "#666",
     marginLeft: 8,
   },
-  loginButton: {
+  deleteButton: {
     flexDirection: "row",
     backgroundColor: "#408dc5",
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 10,
   },
-  addTopicsText: {
+  deleteText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
@@ -391,19 +356,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textTransform: "uppercase",
   },
-  menuButton: {
-    position: "absolute",
-    top: 20,
-    left: 20,
-    zIndex: 2,
-    backgroundColor: "#0077b6",
-    borderRadius: 30,
-    padding: 8,
-  },
-  leftMenu: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   commentBox: {
     marginVertical: 8,
     padding: 10,
@@ -424,7 +376,6 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 4,
   },
-
   commentInputContainer: {
     flexDirection: "row",
     alignItems: "center",

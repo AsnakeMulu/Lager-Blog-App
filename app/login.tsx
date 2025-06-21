@@ -31,7 +31,6 @@ export default function LoginScreen() {
       email: "",
       password: "",
     };
-
     let valid = true;
 
     if (!email) {
@@ -47,7 +46,6 @@ export default function LoginScreen() {
     }
 
     setErrors(newErrors);
-
     if (!valid) return;
 
     try {
@@ -57,7 +55,6 @@ export default function LoginScreen() {
         password,
       });
 
-      // Store token
       await AsyncStorage.setItem("access_token", response.data.access);
       await AsyncStorage.setItem("refresh_token", response.data.refresh);
 
@@ -181,10 +178,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
   },
-  inputMuted: {
-    backgroundColor: "#f0f0f0",
-    borderColor: "#ddd",
-  },
   forgotBtn: {
     alignItems: "flex-end",
     marginBottom: 24,
@@ -248,13 +241,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // marginBottom: 12,
     padding: 12,
-    // paddingBottom: 12,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   welcomeText: {
     fontSize: 20,
@@ -262,21 +248,5 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontWeight: "bold",
     textTransform: "uppercase",
-  },
-  leftMenu: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  loginButton: {
-    backgroundColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  addTopicsText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-    paddingHorizontal: 15,
   },
 });

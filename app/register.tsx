@@ -36,7 +36,6 @@ export default function RegisterScreen() {
       password: "",
       confirmPassword: "",
     };
-
     let valid = true;
 
     if (!email) {
@@ -63,7 +62,6 @@ export default function RegisterScreen() {
     }
 
     setErrors(newErrors);
-
     if (!valid) return;
 
     try {
@@ -88,7 +86,6 @@ export default function RegisterScreen() {
   return (
     <>
       <View style={styles.header}>
-        {/* <View style={styles.leftMenu}> */}
         <TouchableOpacity onPress={() => router.push("/welcome")}>
           <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
@@ -96,7 +93,6 @@ export default function RegisterScreen() {
           <Text style={styles.welcomeText}>Lager Blogs</Text>
         </View>
         <Text style={styles.addTopicsText}></Text>
-        {/* </View> */}
       </View>
       <View style={styles.container}>
         <Text style={styles.title}>Create Account</Text>
@@ -284,13 +280,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // marginBottom: 12,
     padding: 12,
-    // paddingBottom: 12,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   welcomeText: {
     fontSize: 20,
@@ -298,17 +287,6 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontWeight: "bold",
     textTransform: "uppercase",
-  },
-  leftMenu: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    // alignItems: "center",
-  },
-  loginButton: {
-    backgroundColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
   },
   addTopicsText: {
     color: "#fff",

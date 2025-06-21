@@ -29,13 +29,11 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = async () => {
-    const token = await AsyncStorage.getItem("access_token"); // or 'token'
-
+    const token = await AsyncStorage.getItem("access_token");
     const newErrors = {
       title: "",
       content: "",
     };
-
     let valid = true;
 
     if (!title) {
@@ -49,12 +47,10 @@ export default function RegisterScreen() {
     }
 
     setErrors(newErrors);
-
     if (!valid) return;
 
     try {
       setLoading(true);
-      // let author = caption;
       const response = await axios.post(
         `${API_BASE_URL}/api/posts/`,
         {
@@ -71,7 +67,6 @@ export default function RegisterScreen() {
           },
         }
       );
-
       // console.log("Blog added:", response.data);
       Alert.alert("Success", "The blog created successfully.");
 
@@ -148,7 +143,7 @@ export default function RegisterScreen() {
           textAlignVertical="top"
           style={[
             styles.input,
-            { height: 120 }, // Adjust height for 5 rows (approx. 24px per row)
+            { height: 120 },
             errors.content ? { borderColor: "red" } : null,
           ]}
           onChangeText={(text) => {
@@ -177,7 +172,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f6f6f6",
     padding: 24,
-    // justifyContent: "center",
   },
   title: {
     fontSize: 26,
@@ -214,34 +208,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  loginLink: {
-    textAlign: "center",
-    color: "#666",
-    marginBottom: 20,
-  },
-  orText: {
-    textAlign: "center",
-    marginVertical: 10,
-    color: "#999",
-  },
-  socialContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-  },
-  socialBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
   errorText: {
     color: "red",
     fontSize: 13,
@@ -262,20 +228,5 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontWeight: "bold",
     textTransform: "uppercase",
-  },
-  leftMenu: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  loginButton: {
-    backgroundColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  addTopicsText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
   },
 });

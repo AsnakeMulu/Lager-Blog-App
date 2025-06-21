@@ -13,7 +13,7 @@ export default function Index() {
     checkToken();
   }, []);
 
-  if (isLoggedIn === null) return null; // You can add a loading spinner
+  if (isLoggedIn === null) return null;
 
   return isLoggedIn ? (
     <Redirect href="/(tabs)/home" />
