@@ -2,22 +2,26 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const { user } = useUser();
+  const scrollRef = useRef(null);
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [slug, setSlug] = useState("");
@@ -85,7 +89,7 @@ export default function RegisterScreen() {
     }
   };
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <MaterialIcons name="auto-stories" size={32} color="#fff" />
         <View style={{ flex: 1 }}>
@@ -94,84 +98,104 @@ export default function RegisterScreen() {
       </View>
 
       <View style={styles.container}>
-        <Text style={styles.title}>Create New Blog</Text>
-
-        <Text style={styles.label}>Title</Text>
-        <TextInput
-          value={title}
-          placeholder="Title"
-          placeholderTextColor="#999"
-          style={[styles.input, errors.title ? { borderColor: "red" } : null]}
-          onChangeText={(text) => {
-            setTitle(text);
-            if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          enableOnAndroid
+          enableResetScrollToCoords={false}
+          extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: 16,
+            paddingBottom: 40,
+            backgroundColor: "#f8f8f8",
           }}
-        />
-        {errors.title ? (
-          <Text style={styles.errorText}>{errors.title}</Text>
-        ) : null}
+        >
+          {/* <ScrollView contentContainerStyle={styles.scrollContainer}> */}
+          <Text style={styles.title}>Create New Blog</Text>
 
-        <Text style={styles.label}>Caption(optional)</Text>
-        <TextInput
-          value={caption}
-          placeholder="Caption"
-          placeholderTextColor="#999"
-          style={styles.input}
-          onChangeText={(text) => {
-            setCaption(text);
-          }}
-        />
+          <Text style={styles.label}>Title</Text>
+          <TextInput
+            value={title}
+            placeholder="Title"
+            placeholderTextColor="#999"
+            style={[styles.input, errors.title ? { borderColor: "red" } : null]}
+            onChangeText={(text) => {
+              setTitle(text);
+              if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
+            }}
+          />
+          {errors.title ? (
+            <Text style={styles.errorText}>{errors.title}</Text>
+          ) : null}
 
-        <Text style={styles.label}>Slug(optional)</Text>
-        <TextInput
-          value={slug}
-          placeholder="Slug"
-          placeholderTextColor="#999"
-          style={styles.input}
-          onChangeText={(text) => {
-            setSlug(text);
-          }}
-        />
+          <Text style={styles.label}>Caption(optional)</Text>
+          <TextInput
+            value={caption}
+            placeholder="Caption"
+            placeholderTextColor="#999"
+            style={styles.input}
+            onChangeText={(text) => {
+              setCaption(text);
+            }}
+          />
 
-        <Text style={styles.label}>Content</Text>
-        <TextInput
-          value={content}
-          placeholder="Write the content here"
-          placeholderTextColor="#999"
-          multiline
-          numberOfLines={5}
-          textAlignVertical="top"
-          style={[
-            styles.input,
-            { height: 120 },
-            errors.content ? { borderColor: "red" } : null,
-          ]}
-          onChangeText={(text) => {
-            setContent(text);
-            if (errors.content) setErrors((prev) => ({ ...prev, content: "" }));
-          }}
-          value={content}
-        />
-        {errors.content ? (
-          <Text style={styles.errorText}>{errors.content}</Text>
-        ) : null}
+          <Text style={styles.label}>Slug(optional)</Text>
+          <TextInput
+            value={slug}
+            placeholder="Slug"
+            placeholderTextColor="#999"
+            style={styles.input}
+            onChangeText={(text) => {
+              setSlug(text);
+            }}
+          />
 
-        <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.registerText}>Create Blog</Text>
-          )}
-        </TouchableOpacity>
+          <Text style={styles.label}>Content</Text>
+          <TextInput
+            value={content}
+            placeholder="Write the content here"
+            placeholderTextColor="#999"
+            multiline
+            numberOfLines={5}
+            textAlignVertical="top"
+            style={[
+              styles.input,
+              { height: 120 },
+              errors.content ? { borderColor: "red" } : null,
+            ]}
+            onChangeText={(text) => {
+              setContent(text);
+              if (errors.content)
+                setErrors((prev) => ({ ...prev, content: "" }));
+            }}
+            // value={content}
+          />
+          {errors.content ? (
+            <Text style={styles.errorText}>{errors.content}</Text>
+          ) : null}
+
+          <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.registerText}>Create Blog</Text>
+            )}
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+        {/* </ScrollView> */}
       </View>
-    </>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f6f6f6",
-    padding: 24,
+    padding: 4,
+  },
+  scrollContainer: {
+    padding: 16,
   },
   title: {
     fontSize: 26,
@@ -180,7 +204,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
     marginBottom: 4,
     marginLeft: 4,
@@ -189,11 +213,10 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#0077b6",
+    borderColor: "#ccc",
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
+    padding: 12,
+    // fontSize: 16,
     marginBottom: 10,
   },
   registerBtn: {

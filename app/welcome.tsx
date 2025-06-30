@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../constants/config";
 
 interface Blog {
@@ -90,58 +91,61 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.leftMenu}>
-          {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#fff" />
-          {/* </TouchableOpacity> */}
-          <View>
-            <Text style={styles.welcomeText}>Lager Blogs</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.leftMenu}>
+            {/* <TouchableOpacity style={styles.menuButton}> */}
+            <MaterialIcons name="auto-stories" size={32} color="#fff" />
+            {/* </TouchableOpacity> */}
+            <View>
+              <Text style={styles.welcomeText}>Lager Blogs</Text>
+            </View>
           </View>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/login")}
+          >
+            <MaterialIcons name="login" size={18} color="#fff" />
+            <Text style={styles.addTopicsText}>login</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => router.push("/login")}
-        >
-          <MaterialIcons name="login" size={18} color="#fff" />
-          <Text style={styles.addTopicsText}>login</Text>
-        </TouchableOpacity>
+        <FlatList
+          data={filteredBlogs}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <>
+              <View style={styles.emptyStateContainer}>
+                <Text style={styles.emptyStateText}>
+                  Hey There, if you like to post new blog and to comment on
+                  blogs.
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.registerButton}
+                  onPress={() => router.push("/register")}
+                >
+                  <Text style={styles.addTopicsText}>Register now</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.searchContainer}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search blogs..."
+                  value={searchQuery}
+                  onChangeText={(text) => setSearchQuery(text)}
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Popular Blogs</Text>
+            </>
+          }
+        />
       </View>
-      <FlatList
-        data={filteredBlogs}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <>
-            <View style={styles.emptyStateContainer}>
-              <Text style={styles.emptyStateText}>
-                Hey There, if you like to post new blog and to comment on blogs.
-              </Text>
-
-              <TouchableOpacity
-                style={styles.registerButton}
-                onPress={() => router.push("/register")}
-              >
-                <Text style={styles.addTopicsText}>Register now</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search blogs..."
-                value={searchQuery}
-                onChangeText={(text) => setSearchQuery(text)}
-              />
-            </View>
-            <Text style={styles.sectionTitle}>Popular Blogs</Text>
-          </>
-        }
-      />
-    </View>
+    </SafeAreaView>
   );
 }
 

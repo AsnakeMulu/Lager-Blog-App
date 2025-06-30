@@ -6,7 +6,6 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Platform, StatusBar as RNStatusBar, View } from "react-native";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -40,16 +39,17 @@ export default function RootLayout() {
     <UserProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <SafeAreaProvider>
-          {Platform.OS === "android" && (
+          {/* {Platform.OS === "android" && (
             <View
               style={{
                 height: RNStatusBar.currentHeight,
                 backgroundColor: "#0077b6",
               }}
             />
-          )}
+          )} */}
           <Stack screenOptions={{ headerShown: false }}></Stack>
-          <StatusBar style="auto" />
+          {/* <StatusBar style="auto" /> */}
+          <StatusBar style="light" translucent />
         </SafeAreaProvider>
       </ThemeProvider>
     </UserProvider>

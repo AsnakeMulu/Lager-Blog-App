@@ -6,12 +6,15 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../constants/config";
 import { useUser } from "../utils/UserContext";
 
@@ -70,7 +73,7 @@ export default function LoginScreen() {
     }
   };
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push("/welcome")}>
           <MaterialIcons name="arrow-back" size={28} color="#fff" />
@@ -78,82 +81,96 @@ export default function LoginScreen() {
         <Text style={styles.welcomeText}>Lager Blogs</Text>
         <Text style={styles.addTopicsText}></Text>
       </View>
-      <View style={styles.container}>
-        <Text style={styles.title}>Login here</Text>
-        <Text style={styles.subtitle}>Welcome back you've been missed!</Text>
+      <KeyboardAwareScrollView
+        // ref={scrollRef}
+        enableOnAndroid
+        enableResetScrollToCoords={false}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 16,
+          paddingBottom: 40,
+          backgroundColor: "#f8f8f8",
+        }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Login here</Text>
+          <Text style={styles.subtitle}>Welcome back you've been missed!</Text>
 
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="#999"
-          style={[styles.input, errors.email ? { borderColor: "red" } : null]}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          onChangeText={(text) => {
-            setEmail(text);
-            if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
-          }}
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email}</Text>
-        ) : null}
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#999"
+            style={[styles.input, errors.email ? { borderColor: "red" } : null]}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            onChangeText={(text) => {
+              setEmail(text);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+            }}
+          />
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
 
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#999"
-          secureTextEntry
-          style={[
-            styles.input,
-            errors.password ? { borderColor: "red" } : null,
-          ]}
-          onChangeText={(text) => {
-            setPassword(text);
-            if (errors.password)
-              setErrors((prev) => ({ ...prev, password: "" }));
-          }}
-        />
-        {errors.password ? (
-          <Text style={styles.errorText}>{errors.password}</Text>
-        ) : null}
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#999"
+            secureTextEntry
+            style={[
+              styles.input,
+              errors.password ? { borderColor: "red" } : null,
+            ]}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (errors.password)
+                setErrors((prev) => ({ ...prev, password: "" }));
+            }}
+          />
+          {errors.password ? (
+            <Text style={styles.errorText}>{errors.password}</Text>
+          ) : null}
 
-        <TouchableOpacity style={styles.forgotBtn}>
-          <Text style={styles.forgotText}>Forgot your password?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.signinBtn} onPress={handleLogin}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.signinText}>Sign in</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push("/register")}>
-          <Text style={styles.registerText}>Create new account</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.orText}>Or continue with</Text>
-
-        <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialBtn}>
-            <AntDesign name="google" size={20} color="black" />
+          <TouchableOpacity style={styles.forgotBtn}>
+            <Text style={styles.forgotText}>Forgot your password?</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialBtn}>
-            <FontAwesome name="facebook" size={20} color="black" />
+
+          <TouchableOpacity style={styles.signinBtn} onPress={handleLogin}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.signinText}>Sign in</Text>
+            )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialBtn}>
-            <AntDesign name="apple1" size={20} color="black" />
+
+          <TouchableOpacity onPress={() => router.push("/register")}>
+            <Text style={styles.registerText}>Create new account</Text>
           </TouchableOpacity>
+
+          <Text style={styles.orText}>Or continue with</Text>
+
+          <View style={styles.socialContainer}>
+            <TouchableOpacity style={styles.socialBtn}>
+              <AntDesign name="google" size={20} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialBtn}>
+              <FontAwesome name="facebook" size={20} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialBtn}>
+              <AntDesign name="apple1" size={20} color="black" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </>
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f7f7f7",
-    padding: 24,
-    justifyContent: "center",
+    paddingTop: 40,
+    // justifyContent: "center",
   },
   title: {
     fontSize: 26,
@@ -173,9 +190,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#0077b6",
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
+    padding: 14,
+    fontSize: 14,
     marginBottom: 16,
   },
   forgotBtn: {
@@ -188,7 +204,7 @@ const styles = StyleSheet.create({
   },
   signinBtn: {
     backgroundColor: "#408dc5",
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 20,
@@ -200,8 +216,9 @@ const styles = StyleSheet.create({
   },
   registerText: {
     textAlign: "center",
-    color: "#666",
+    color: "#0077b6",
     marginBottom: 20,
+    fontWeight: "600",
   },
   orText: {
     textAlign: "center",
@@ -248,5 +265,11 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontWeight: "bold",
     textTransform: "uppercase",
+  },
+  addTopicsText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+    paddingHorizontal: 20,
   },
 });

@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
@@ -48,100 +49,102 @@ const ProfileScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.leftMenu}>
-          {/* <TouchableOpacity style={styles.menuButton}> */}
-          <MaterialIcons name="auto-stories" size={32} color="#fff" />
-          {/* </TouchableOpacity> */}
-          <View>
-            <Text style={styles.welcomeText}>Lager Blogs</Text>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.leftMenu}>
+            {/* <TouchableOpacity style={styles.menuButton}> */}
+            <MaterialIcons name="auto-stories" size={32} color="#fff" />
+            {/* </TouchableOpacity> */}
+            <View>
+              <Text style={styles.welcomeText}>Lager Blogs</Text>
+            </View>
           </View>
-        </View>
-        <TouchableOpacity style={styles.loginButton} onPress={logout}>
-          <MaterialIcons name="logout" size={18} color="#fff" />
-          <Text style={styles.addTopicsText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={posts}
-        contentContainerStyle={styles.tagsContainer}
-        keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={
-          <>
-            {/* Profile Header */}
-            <View style={styles.profileHeader}>
-              <Image
-                source={{ uri: "https://example.com/profile-pic.jpg" }}
-                style={styles.profileImage}
-              />
-              <Text style={styles.profileName}>{user?.username}</Text>
-              <Text style={styles.profileHandle}>{user?.email}</Text>
-
-              {/* Stats Row */}
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{posts.length}</Text>
-                  <Text style={styles.statLabel}>P O S T S</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>100</Text>
-                  <Text style={styles.statLabel}>S A V E D</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>200</Text>
-                  <Text style={styles.statLabel}>S H A R E</Text>
-                </View>
-              </View>
-
-              <Text style={styles.sectionTitle}>Your Latest Blogs</Text>
-            </View>
-          </>
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: "/blog/[id]",
-                params: { id: item.id.toString() },
-              })
-            }
-          >
-            <View
-              style={{
-                marginHorizontal: 16,
-                marginBottom: 14,
-                padding: 12,
-                backgroundColor: "#f2f2f2",
-                borderRadius: 8,
-              }}
-            >
-              <Text style={styles.feedTitle}>{item.title}</Text>
-              <Text numberOfLines={2} style={{ paddingBottom: 6 }}>
-                {item.content}
-              </Text>
-              <Text style={styles.feedMeta}>
-                {new Date(item.created_at).toDateString()}
-              </Text>
-            </View>
+          <TouchableOpacity style={styles.loginButton} onPress={logout}>
+            <MaterialIcons name="logout" size={18} color="#fff" />
+            <Text style={styles.addTopicsText}>Logout</Text>
           </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          loading ? (
-            <ActivityIndicator
-              size="large"
-              color="#ff7101"
-              style={{ marginTop: 20 }}
-            />
-          ) : (
-            <Text style={{ textAlign: "center", marginTop: 20 }}>
-              No posts yet.
-            </Text>
-          )
-        }
-      />
-    </View>
+        </View>
+
+        <FlatList
+          data={posts}
+          contentContainerStyle={styles.tagsContainer}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={
+            <>
+              {/* Profile Header */}
+              <View style={styles.profileHeader}>
+                <Image
+                  source={{ uri: "https://example.com/profile-pic.jpg" }}
+                  style={styles.profileImage}
+                />
+                <Text style={styles.profileName}>{user?.username}</Text>
+                <Text style={styles.profileHandle}>{user?.email}</Text>
+
+                {/* Stats Row */}
+                <View style={styles.statsContainer}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>{posts.length}</Text>
+                    <Text style={styles.statLabel}>P O S T S</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>100</Text>
+                    <Text style={styles.statLabel}>S A V E D</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>200</Text>
+                    <Text style={styles.statLabel}>S H A R E</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.sectionTitle}>Your Latest Blogs</Text>
+              </View>
+            </>
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/blog/[id]",
+                  params: { id: item.id.toString() },
+                })
+              }
+            >
+              <View
+                style={{
+                  marginHorizontal: 16,
+                  marginBottom: 14,
+                  padding: 12,
+                  backgroundColor: "#f2f2f2",
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={styles.feedTitle}>{item.title}</Text>
+                <Text numberOfLines={2} style={{ paddingBottom: 6 }}>
+                  {item.content}
+                </Text>
+                <Text style={styles.feedMeta}>
+                  {new Date(item.created_at).toDateString()}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            loading ? (
+              <ActivityIndicator
+                size="large"
+                color="#ff7101"
+                style={{ marginTop: 20 }}
+              />
+            ) : (
+              <Text style={{ textAlign: "center", marginTop: 20 }}>
+                No posts yet.
+              </Text>
+            )
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 

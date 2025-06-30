@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
@@ -141,7 +142,7 @@ export default function Index() {
     );
   }
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <View style={styles.leftMenu}>
           {/* <TouchableOpacity style={styles.menuButton}> */}
@@ -191,7 +192,7 @@ export default function Index() {
           contentContainerStyle={{ paddingBottom: 4 }}
         />
       </View>
-    </>
+    </SafeAreaView>
   );
 }
 

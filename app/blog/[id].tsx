@@ -3,18 +3,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  ScrollView,
+  Keyboard,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
 
@@ -23,18 +27,34 @@ export default function BlogDetailScreen() {
   const { user } = useUser();
   const router = useRouter();
   const navigation = useNavigation();
+  const scrollRef = useRef(null);
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/api/posts/${id}/`);
         setPost(res.data);
-        console.log(res.data);
+        // console.log(res.data);
       } catch (err) {
         console.error("Failed to fetch post", err);
       }
@@ -86,6 +106,10 @@ export default function BlogDetailScreen() {
 
       setComments((prev) => [res.data, ...prev]);
       setNewComment("");
+      Keyboard.dismiss();
+      setTimeout(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      }, 300);
     } catch (err) {
       console.error("Failed to add comment", err.response?.data);
     } finally {
@@ -164,13 +188,13 @@ export default function BlogDetailScreen() {
   if (!post) return <Text>No Posts...</Text>;
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={32} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.welcomeText}> Blog details</Text>
-        {post.author.id === user?.id && (
+        <Text style={styles.welcomeText}>Blog details</Text>
+        {post.author.id === user?.id ? (
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={() => handleDeletePost(post.id)}
@@ -178,19 +202,39 @@ export default function BlogDetailScreen() {
             <Ionicons name="trash-outline" size={18} color="#e63946" />
             <Text style={styles.deleteText}> Delete</Text>
           </TouchableOpacity>
-        )}
-        {post.author.id !== user?.id && (
+        ) : (
           <View style={{ paddingHorizontal: 15 }}></View>
         )}
       </View>
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.container}>
+      {/* <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={0}
+      > */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        {/* <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+          > */}
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          enableOnAndroid
+          enableResetScrollToCoords={false}
+          extraScrollHeight={Platform.OS === "ios" ? 50 : 150}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: 16,
+            paddingBottom: 50,
+            backgroundColor: "#fff",
+          }}
+        >
           <Text style={styles.title}>{post.title}</Text>
           <View style={styles.meta}>
             <Image source={{ uri: post.author_image }} style={styles.avatar} />
             <Text style={styles.author}>{post.author.username}</Text>
             <Text style={styles.date}>
-              {" "}
               <Ionicons name="time-outline" size={14} />{" "}
               {new Date(post.created_at).toDateString()}
             </Text>
@@ -198,7 +242,6 @@ export default function BlogDetailScreen() {
 
           <Image source={{ uri: post.image }} style={styles.image} />
           <Text style={styles.caption}>{post.caption}</Text>
-
           <Text style={styles.body}>{post.content}</Text>
 
           <Text style={[styles.title, { marginTop: 24 }]}>Comments</Text>
@@ -237,7 +280,7 @@ export default function BlogDetailScreen() {
             ))
           )}
 
-          {user && (
+          {user ? (
             <View style={styles.commentInputContainer}>
               <TextInput
                 style={styles.commentInput}
@@ -257,15 +300,16 @@ export default function BlogDetailScreen() {
                 )}
               </TouchableOpacity>
             </View>
-          )}
-          {!user && (
+          ) : (
             <Text style={{ marginTop: 10, color: "#777" }}>
               Please log in to post a comment.
             </Text>
           )}
-        </ScrollView>
-      </View>
-    </>
+        </KeyboardAwareScrollView>
+        {/* </ScrollView> */}
+      </TouchableWithoutFeedback>
+      {/* </KeyboardAvoidingView> */}
+    </SafeAreaView>
   );
 }
 
