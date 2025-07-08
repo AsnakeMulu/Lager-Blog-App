@@ -48,6 +48,15 @@ const ProfileScreen = () => {
     fetchUserPosts();
   }, []);
 
+  const stripMarkdown = (markdown) => {
+    return markdown
+      .replace(/[*_~`>#-]+/g, "") // Remove symbols like **, ##, --, etc.
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove [text](link)
+      .replace(/!\[.*\]\(.*\)/g, "") // Remove images
+      .replace(/\n+/g, " ") // Collapse line breaks into space
+      .trim();
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <View style={styles.container}>
@@ -121,7 +130,7 @@ const ProfileScreen = () => {
               >
                 <Text style={styles.feedTitle}>{item.title}</Text>
                 <Text numberOfLines={2} style={{ paddingBottom: 6 }}>
-                  {item.content}
+                  {stripMarkdown(item.content)}
                 </Text>
                 <Text style={styles.feedMeta}>
                   {new Date(item.created_at).toDateString()}

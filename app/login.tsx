@@ -57,7 +57,7 @@ export default function LoginScreen() {
         email,
         password,
       });
-
+      console.log(response.data.access);
       await AsyncStorage.setItem("access_token", response.data.access);
       await AsyncStorage.setItem("refresh_token", response.data.refresh);
 

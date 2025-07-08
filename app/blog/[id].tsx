@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Markdown from "react-native-markdown-display";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../../constants/config";
 import { useUser } from "../../utils/UserContext";
@@ -242,8 +243,10 @@ export default function BlogDetailScreen() {
 
           <Image source={{ uri: post.image }} style={styles.image} />
           <Text style={styles.caption}>{post.caption}</Text>
-          <Text style={styles.body}>{post.content}</Text>
-
+          <Markdown>
+            {post.content}
+            {/* <Text style={styles.body}>{post.content}</Text> */}
+          </Markdown>
           <Text style={[styles.title, { marginTop: 24 }]}>Comments</Text>
 
           {comments.length === 0 ? (
