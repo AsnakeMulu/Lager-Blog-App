@@ -34,22 +34,25 @@ export default function BlogDetailScreen() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  // const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
+  const [isSaved, setIsSaved] = useState(false);
 
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-    });
+  // useEffect(() => {
+  //   const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
+  //     setKeyboardHeight(e.endCoordinates.height);
+  //   });
 
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
+  //   const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+  //     setKeyboardHeight(0);
+  //   });
+
+  //   return () => {
+  //     showSub.remove();
+  //     hideSub.remove();
+  //   };
+  // }, []);
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -67,8 +70,6 @@ export default function BlogDetailScreen() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const token = await AsyncStorage.getItem("access_token"); // ✅ Get the token
-
         const res = await axios.get(`${API_BASE_URL}/api/comments/?post=${id}`);
 
         setComments(res.data);
@@ -84,6 +85,29 @@ export default function BlogDetailScreen() {
     fetchComments();
   }, []);
 
+  useEffect(() => {
+    if (!post) return;
+
+    const fetchSavedStatus = async () => {
+      const token = await AsyncStorage.getItem("access_token");
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/posts/${post.id}/is-saved/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setIsSaved(response.data.is_saved);
+      } catch (error) {
+        console.log("Check saved status failed:", error);
+      }
+    };
+
+    fetchSavedStatus();
+  }, [post]);
+
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -95,7 +119,7 @@ export default function BlogDetailScreen() {
         `${API_BASE_URL}/api/comments/`,
         {
           text: newComment,
-          post: id, // Include post ID here ✅
+          post: id,
           author: user?.id,
         },
         {
@@ -186,38 +210,64 @@ export default function BlogDetailScreen() {
     );
   };
 
+  const handleToggleSave = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/posts/${post.id}/toggle-save/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const newState = !isSaved;
+      setIsSaved(newState);
+      Alert.alert(newState ? "Saved" : "Removed", response.data.message);
+    } catch (error) {
+      console.log("Save/Unsave failed:", error.response?.data || error.message);
+      Alert.alert("Error", "Something went wrong.");
+    }
+  };
+
   if (!post) return <Text>No Posts...</Text>;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={32} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.welcomeText}>Blog details</Text>
-        {post.author.id === user?.id ? (
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => handleDeletePost(post.id)}
-          >
-            <Ionicons name="trash-outline" size={18} color="#e63946" />
-            <Text style={styles.deleteText}> Delete</Text>
+      {post && post.author && (
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={32} color="#fff" />
           </TouchableOpacity>
-        ) : (
-          <View style={{ paddingHorizontal: 15 }}></View>
-        )}
-      </View>
-      {/* <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={0}
-      > */}
+          <Text style={styles.welcomeText}>Blog details</Text>
+
+          {post.author.id === user?.id ? (
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeletePost(post.id)}
+            >
+              <Ionicons name="trash-outline" size={18} color="#e63946" />
+              <Text style={styles.deleteText}> Delete</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleToggleSave}
+            >
+              <Ionicons
+                name={isSaved ? "bookmark" : "bookmark-outline"}
+                size={20}
+                color="#0077b6"
+              />
+              <Text style={styles.saveText}>{isSaved ? "Saved" : "Save"}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        {/* <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={styles.container}
-            keyboardShouldPersistTaps="handled"
-          > */}
         <KeyboardAwareScrollView
           ref={scrollRef}
           enableOnAndroid
@@ -243,10 +293,7 @@ export default function BlogDetailScreen() {
 
           <Image source={{ uri: post.image }} style={styles.image} />
           <Text style={styles.caption}>{post.caption}</Text>
-          <Markdown>
-            {post.content}
-            {/* <Text style={styles.body}>{post.content}</Text> */}
-          </Markdown>
+          <Markdown>{post.content}</Markdown>
           <Text style={[styles.title, { marginTop: 24 }]}>Comments</Text>
 
           {comments.length === 0 ? (
@@ -309,9 +356,7 @@ export default function BlogDetailScreen() {
             </Text>
           )}
         </KeyboardAwareScrollView>
-        {/* </ScrollView> */}
       </TouchableWithoutFeedback>
-      {/* </KeyboardAvoidingView> */}
     </SafeAreaView>
   );
 }
@@ -341,6 +386,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderBlockColor: "#999",
   },
+
+  saveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+
+  saveText: {
+    color: "#0077b6",
+    fontSize: 14,
+    marginLeft: 5,
+  },
+
   author: {
     fontSize: 14,
     fontWeight: "500",

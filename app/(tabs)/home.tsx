@@ -26,19 +26,69 @@ interface Blog {
   image?: string;
 }
 
-const PopularTags = ({ tags }: { tags: string[] }) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.tagsContainer}
-    style={styles.tagsScrollView}
-  >
-    {tags.map((tag, index) => (
-      <TouchableOpacity style={styles.tagItem} key={`tag-${index}`}>
-        <Text style={styles.tagText}>{tag}</Text>
+type CategoryFilterProps = {
+  categories: { id: number; name: string }[];
+  activeCategory: number | null; // null means "All"
+  onCategorySelect: (categoryId: number | null) => void;
+};
+
+const CategoryFilter = ({
+  categories,
+  activeCategory,
+  onCategorySelect,
+}: CategoryFilterProps) => {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.tagsContainer}
+    >
+      <TouchableOpacity
+        style={[styles.item, activeCategory === null && styles.activeItem]}
+        onPress={() => onCategorySelect(null)} // "All"
+      >
+        <Text
+          style={[styles.text, activeCategory === null && styles.activeText]}
+        >
+          All
+        </Text>
       </TouchableOpacity>
-    ))}
-  </ScrollView>
+
+      {categories.map((cat) => (
+        <TouchableOpacity
+          key={cat.id}
+          style={[styles.item, activeCategory === cat.id && styles.activeItem]}
+          onPress={() => onCategorySelect(cat.id)}
+        >
+          <Text
+            style={[
+              styles.text,
+              activeCategory === cat.id && styles.activeText,
+            ]}
+          >
+            {cat.name}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+};
+
+const PopularTags = ({ tags }: { tags: string[] }) => (
+  <>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.tagsContainer}
+      style={styles.tagsScrollView}
+    >
+      {tags.map((tag, index) => (
+        <TouchableOpacity style={styles.tagItem} key={`tag-${index}`}>
+          <Text style={styles.tagText}>{tag}</Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  </>
 );
 
 export default function Index() {
@@ -62,7 +112,20 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [categoryList, setCategoryList] = useState([]);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null); // null = All
+  // const [filteredPosts, setFilteredPosts] = useState(posts); // original blog posts list
 
+  const handleCategorySelect = (categoryId: number | null) => {
+    setActiveCategory(categoryId);
+    if (categoryId === null) {
+      setFilteredBlogs(blogs); // all posts
+    } else {
+      setFilteredBlogs(
+        blogs.filter((post) => post.categories.includes(categoryId))
+      );
+    }
+  };
   useEffect(() => {
     if (isFocused) {
       fetchBlogs();
@@ -73,12 +136,31 @@ export default function Index() {
     fetchBlogs();
   }, []);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   const fetchBlogs = async () => {
     try {
       const response = await axios.get<Blog[]>(`${API_BASE_URL}/api/posts/`);
 
       setBlogs(response.data);
       setFilteredBlogs(response.data);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/categories/`);
+
+      setCategoryList(response.data);
+      // setFilteredBlogs(response.data);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "An unknown error occurred";
@@ -182,9 +264,13 @@ export default function Index() {
                 />
               </View>
 
-              <Text style={styles.sectionTitle}>Popular Tags</Text>
-              <PopularTags tags={popularTags} />
-
+              <Text style={styles.sectionTitle}>Blog Catagories</Text>
+              {/* <PopularTags tags={popularTags} /> */}
+              <CategoryFilter
+                categories={categoryList}
+                activeCategory={activeCategory}
+                onCategorySelect={handleCategorySelect}
+              />
               <Text style={styles.sectionTitle}>Popular Blogs</Text>
             </>
           }
@@ -247,10 +333,10 @@ const styles = StyleSheet.create({
   tagsContainer: {
     paddingBottom: 4,
   },
-  tagsScrollView: {
-    maxHeight: 50, // Adjusted height for tags container
-    marginBottom: 4,
-  },
+  // tagsScrollView: {
+  //   maxHeight: 50, // Adjusted height for tags container
+  //   marginBottom: 4,
+  // },
   tagItem: {
     backgroundColor: "#f0f0f0",
     paddingHorizontal: 10,
@@ -264,6 +350,24 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     marginVertical: 4,
+  },
+  item: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: "#eee",
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  activeItem: {
+    backgroundColor: "#0077b6",
+  },
+  text: {
+    color: "#333",
+    fontSize: 14,
+  },
+  activeText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   header: {
     flexDirection: "row",
